@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="#666666"
+             android:orientation="vertical">
+
+    <com.leo.viewsproject.widget.PKProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="47dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="10dp"
+            app:leftDrawableBg="@drawable/kl_kcal_left_bg"
+            app:rightDrawableBg="@drawable/kl_kcal_right_bg"
+            app:lightDrawable="@drawable/pic_progress_light"
+            app:gradientEndColor="#ff5db6"
+            app:gradientStartColor="#fb919e"
+            app:halfDrawableHeight="15dp"
+            app:halfDrawableWidth="2dp"
+            app:isGradient="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:otherGradientEndColor="#38e2e9"
+            app:otherGradientStartColor="#597efe"
+            app:progressHeight="16dp"
+            app:textColor="#ffffff"
+            app:textIsBold="true"
+            app:textSize="13sp"/>
+
+    <Button
+            android:id="@+id/btn_start"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="50dp"
+            android:text="Start"/>
+
+</FrameLayout>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="SwitchView">
+        <attr name="sv_anchor_size" format="integer"/>
+        <attr name="sv_bg_color" format="color"/>
+        <attr name="sv_direct" format="enum">
+            <enum name="LEFT_TOP" value="0"/>
+            <enum name="LEFT_BOTTOM" value="1"/>
+            <enum name="RIGHT_TOP" value="2"/>
+            <enum name="RIGHT_BOTTOM" value="3"/>
+        </attr>
+        <attr name="sv_text_size" format="dimension"/>
+        <attr name="sv_text_color" format="color"/>
+        <attr name="sv_radio_size" format="dimension"/>
+        <attr name="sv_text" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="PKProgressBar_pk">
+
+        <!--外边框底色-->
+        <attr name="backGroundColor" format="color"/>
+        <!--进度条颜色-->
+        <attr name="barColor" format="color"/>
+
+        <!--左侧进度条的透明背景-->
+        <attr name="leftDrawableBg" format="reference"/>
+        <!--右侧进度条的透明背景-->
+        <attr name="rightDrawableBg" format="reference"/>
+        <!--光标宽度-->
+        <attr name="halfDrawableWidth" format="dimension"/>
+        <!--光标高度-->
+        <attr name="halfDrawableHeight" format="dimension"/>
+
+        <!--进度条与外背景边框间隔-->
+        <attr name="barPadding" format="dimension"/>
+
+        <!--进度条是否为圆角-->
+        <attr name="isRound" format="boolean"/>
+
+        <!--初始比例值-->
+        <attr name="progress" format="integer"/>
+        <!--进度条最大值-->
+        <attr name="max" format="integer"/>
+
+        <!--进度条高度（不包含外边框）-->
+        <attr name="progressHeight" format="dimension"/>
+
+        <!--进度条是否为渐变色-->
+        <attr name="isGradient" format="boolean"/>
+        <!--左半部分渐变起始色-->
+        <attr name="gradientStartColor" format="color"/>
+        <!--左半部分渐变结尾色-->
+        <attr name="gradientEndColor" format="color"/>
+        <!--右半部分渐变起始色-->
+        <attr name="otherGradientStartColor" format="color"/>
+        <!--右半部分渐变结尾色-->
+        <attr name="otherGradientEndColor" format="color"/>
+
+        <!--半透明水平光柱资源图（为制造立体效果）-->
+        <attr name="lightDrawable" format="reference"/>
+        <attr name="barDrawable" format="reference"/>
+        <attr name="textColor" format="color"/>
+        <attr name="textSize" format="dimension"/>
+        <attr name="textIsBold" format="boolean"/>
+
+    </declare-styleable>
+
+    <style name="SendTextDialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <!-- 边框 -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- 是否浮现在activity之上 -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- 无标题 -->
+        <item name="android:windowBackground">@color/transparent</item>
+        <!-- 背景透明 -->
+        <item name="android:backgroundDimEnabled">false</item>
+        <!-- 模糊 -->
+        <!-- 输入法弹出时自适应 -->
+        <item name="android:windowSoftInputMode">stateAlwaysVisible</item>
+    </style>
+</resources>
