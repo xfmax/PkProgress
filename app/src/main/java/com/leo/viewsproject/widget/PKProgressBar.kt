@@ -5,11 +5,13 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.leo.viewsproject.R
+import kotlin.math.max
 
 /**
  * Describe : 对战积分对比
@@ -19,7 +21,7 @@ class PKProgressBar : View {
     /**
      * 绘制跟随进度条移动的数字
      */
-    private var paintNumber: Paint? = null
+    private lateinit var paintNumber: Paint
     private var paintBar: Paint? = null
     private var paintOtherBar: Paint? = null
     private var paintLight: Paint? = null
@@ -79,6 +81,30 @@ class PKProgressBar : View {
     var rightFollowTextStr = ""
     private var lightBitmap: Bitmap? = null
     private var lightDrawableId = 0
+
+    private var leftTextStrWidth = 0f
+    private var leftTextStrHeight = 0f
+    private var leftTextStrMargin = 21f.dp
+    private var leftTeamNameMargin = 6f.dp
+    private var leftTextStrBg = 57f.dp
+
+    private var rightTextStrWidth = 0f
+    private var rightTextStrHeight = 0f
+    private var rightTextStrMargin = 21f.dp
+
+    private var leftFollowWidth = 0f
+    private var leftFollowHeight = 0f
+    private var rightFollowWidth = 0f
+    private var rightFollowHeight = 0f
+
+    private var leftTeamNameVisible = true
+    private var leftTeamCountVisible = true
+
+    private var rightTeamNameVisible = true
+    private var rightTeamCountVisible = true
+
+    private var leftTeamNameWidth = 0f
+    private var leftTeamCountWidth = 0f
 
     constructor(context: Context?) : super(context) {
         init()
@@ -150,7 +176,10 @@ class PKProgressBar : View {
         paintLeftText!!.color = textColor
         paintLeftText!!.textSize = textSize.toFloat()
 
-        // 左半部分数字
+        leftTextStrWidth = paintLeftText?.measureText(leftTextStr).orZero()
+        leftTextStrHeight = paintLeftText?.descent().orZero() - paintLeftText?.ascent().orZero()
+
+        // 团队数字
         val plainNumber = Typeface.createFromAsset(context.assets, "font/Roboto-BlackItalic.ttf")
         paintNumber = Paint().apply {
             typeface = plainNumber
@@ -176,6 +205,7 @@ class PKProgressBar : View {
         if (lightDrawableId != 0) {
             lightBitmap = BitmapFactory.decodeResource(resources, lightDrawableId)
         }
+
         viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
                 viewTreeObserver.removeOnPreDrawListener(this)
@@ -213,7 +243,8 @@ class PKProgressBar : View {
 
         // 光标水平位置
         viewWidth = ((progressWidth - 3 * barPadding) * progressPercentage + barPadding).toFloat()
-
+        viewWidth = max(viewWidth, leftTextStrBg + leftTextStrMargin + leftFollowWidth)
+        Log.d("xbase", "onDraw: $viewWidth")
         viewHeight = height
         // 圆角大小，为实际进度条高度一半
         if (isRound) {
@@ -230,29 +261,31 @@ class PKProgressBar : View {
         drawPicture(canvas)
         // 绘制横向半透明光柱
         drawLight(canvas)
-        // 绘制左边与右边文字
-        drawTeamInfoText(canvas)
         // 绘制跟随进度条移动的文字
         drawFollowText(canvas)
+        // 绘制队伍信息
+        drawTeamInfoText(canvas)
     }
 
     private fun drawFollowText(canvas: Canvas) {
-        val leftWidth = paintNumber?.measureText(leftFollowTextStr).orZero()
-        val leftHeight: Float = paintNumber?.descent().orZero() - paintNumber?.ascent().orZero()
+        val leftFollowStart = boundaryPosition - leftFollowWidth - halfDrawableWidth - 16.dp
         canvas.drawText(
             leftFollowTextStr,
-            boundaryPosition - leftWidth - halfDrawableWidth - 16.dp,
-            viewHeight / 2f + leftHeight / 3,
+            boundaryPosition - leftFollowWidth - halfDrawableWidth - 16.dp,
+            viewHeight / 2f + leftFollowHeight / 3,
             paintNumber
         )
-        val rightTextHeight: Float =
-            paintNumber?.descent().orZero() - paintNumber?.ascent().orZero()
+        leftTeamCountVisible =
+            leftFollowStart > leftTextStrBg + leftTeamNameWidth + leftTextStrMargin * 2 + leftTeamCountWidth
+        leftTeamNameVisible =
+            leftFollowStart > leftTextStrBg + leftTeamNameMargin + leftTeamNameWidth
         canvas.drawText(
             rightFollowTextStr,
             boundaryPosition + 16.dp,
-            viewHeight / 2f + rightTextHeight / 3,
+            viewHeight / 2f + rightFollowHeight / 3,
             paintNumber
         )
+
     }
 
     private fun drawLight(canvas: Canvas) {
@@ -318,12 +351,13 @@ class PKProgressBar : View {
             barRadioSize, barRadioSize,
             barRadioSize, barRadioSize, 0f, 0f
         )
-        if (progressPercentage == 0.0) {
-            radios[0] = barRadioSize
-            radios[1] = barRadioSize
-            radios[6] = barRadioSize
-            radios[7] = barRadioSize
-        }
+        // 去掉有进度条的左侧圆角
+//         (progressPercentage == 0.0) {
+//            radios[0] = barRadioSize
+//            radios[1] = barRadioSize
+//            radios[6] = barRadioSize
+//            radios[7] = barRadioSize
+//        }
         canvas.save()
         rectFPBO[left + halfDrawableWidth, barPadding.toFloat(), barEndWidth.toFloat()] =
             (viewHeight - barPadding).toFloat()
@@ -339,10 +373,6 @@ class PKProgressBar : View {
     }
 
     private fun drawTeamInfoText(canvas: Canvas) {
-        paintLeftText!!.getTextBounds(leftTextStr, 0, leftTextStr.length, rectLeftText)
-        paintRightText!!.getTextBounds(rightTextStr, 0, rightTextStr.length, rectRightText)
-        val des1W = rectRightText.width()
-        val desH = rectLeftText.height()
         //左侧
         // 绘制文字的背景
         canvas.drawRoundRect(
@@ -356,31 +386,33 @@ class PKProgressBar : View {
         )
         canvas.drawText(
             leftTextStr,
-            21f.dp,
-            viewHeight / 2f + desH / 3.0f,
+            leftTextStrMargin,
+            viewHeight / 2f + leftTextStrHeight / 3.0f,
             paintLeftText
         )
-        val teamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
-        // 队名
-        canvas.drawText(
-            leftTeamName,
-            63f.dp,
-            viewHeight / 2f + desH / 3.0f,
-            paintLeftText
-        )
-        val teamCountWidth = paintLeftText?.measureText(leftTeamCount).orZero()
-        // 队伍人数
-        canvas.drawText(
-            leftTeamCount,
-            63f.dp + teamNameWidth + 6f.dp,
-            viewHeight / 2f + desH / 3.0f,
-            paintLeftText
-        )
+        if (leftTeamNameVisible) {
+            // 队名
+            canvas.drawText(
+                leftTeamName,
+                leftTextStrBg + leftTeamNameMargin,
+                viewHeight / 2f + leftTextStrHeight / 3.0f,
+                paintLeftText
+            )
+        }
+        if (leftTeamCountVisible){
+            // 队伍人数
+            canvas.drawText(
+                leftTeamCount,
+                leftTextStrBg + leftTeamNameWidth + leftTeamNameMargin * 2,
+                viewHeight / 2f + leftTextStrHeight / 3.0f,
+                paintLeftText
+            )
+        }
         // 右侧
         canvas.drawText(
             rightTextStr,
-            progressWidth - viewHeight / 2f - des1W - barPadding,
-            viewHeight / 2f + desH / 3.0f,
+            progressWidth - viewHeight / 2f - rightTextStrWidth - barPadding,
+            viewHeight / 2f + leftTextStrHeight / 3.0f,
             paintRightText
         )
     }
@@ -399,7 +431,8 @@ class PKProgressBar : View {
             var boundaryPos = viewWidth
             if (progressPercentage == 0.0 || viewWidth == barStartWidth.toFloat()) {
                 // 光标位于最左边
-                boundaryPos = barPadding.toFloat() + 57.dp
+                boundaryPos =
+                    barPadding.toFloat() + leftTextStrBg + leftTextStrMargin + leftFollowWidth
             } else if (progressPercentage == 1.0 || viewWidth == barEndWidth.toFloat()) {
                 // 光标位于最右边
                 boundaryPos = barEndWidth.toFloat()
@@ -450,6 +483,23 @@ class PKProgressBar : View {
         // 记录进度条结束位置
         barEndWidth = progressWidth - barPadding
         setMeasuredDimension(width, height)
+
+        leftTextStrWidth = paintRightText?.measureText(leftTextStr).orZero()
+        leftTextStrHeight = paintLeftText?.descent().orZero() - paintLeftText?.ascent().orZero()
+
+        rightTextStrWidth = paintRightText?.measureText(rightTextStr).orZero()
+        rightTextStrHeight = paintRightText?.descent().orZero() - paintRightText?.ascent().orZero()
+
+        leftFollowWidth = paintNumber.measureText(leftFollowTextStr).orZero()
+        leftFollowHeight = paintNumber.descent().orZero() - paintNumber.ascent().orZero()
+
+        rightFollowWidth = paintNumber.measureText(rightFollowTextStr).orZero()
+        rightFollowHeight = paintNumber.descent().orZero() - paintNumber.ascent().orZero()
+
+        leftTeamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
+
+        leftTeamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
+        leftTeamCountWidth = paintLeftText?.measureText(leftTeamCount).orZero()
     }
 
     interface OnProgressChangeListener {

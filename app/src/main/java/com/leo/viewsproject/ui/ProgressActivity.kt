@@ -19,7 +19,7 @@ class ProgressActivity : AppCompatActivity() {
         setContentView(R.layout.activity_progress)
         btnstart = findViewById(R.id.btn_start)
         pkProgressBar = findViewById(R.id.progress)
-        pkProgressBar?.setAnimProgress(0,100)
+        pkProgressBar?.setAnimProgress(100,100)
         pkProgressBar?.leftTeamName = "卡卡特罗队"
         pkProgressBar?.leftTeamCount = "38人"
         with(btnstart) {
