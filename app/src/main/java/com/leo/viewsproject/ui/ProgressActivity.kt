@@ -19,8 +19,9 @@ class ProgressActivity : AppCompatActivity() {
         setContentView(R.layout.activity_progress)
         btnstart = findViewById(R.id.btn_start)
         pkProgressBar = findViewById(R.id.progress)
-        pkProgressBar?.leftFollowTextStr = "876m"
-        pkProgressBar?.rightFollowTextStr = "962m"
+        pkProgressBar?.setAnimProgress(0,100)
+        pkProgressBar?.leftTeamName = "卡卡特罗队"
+        pkProgressBar?.leftTeamCount = "38人"
         with(btnstart) {
             this?.setOnClickListener(View.OnClickListener {
                 val executor = Executors.newScheduledThreadPool(1)
@@ -30,8 +31,6 @@ class ProgressActivity : AppCompatActivity() {
                         val countRight = 100 - countLeft
                         Log.d("qq", "onCreate: $countLeft,$countRight")
                         runOnUiThread {
-                            pkProgressBar?.leftFollowTextStr = "${countLeft}m"
-                            pkProgressBar?.rightFollowTextStr = "${countRight}m"
                             pkProgressBar?.setAnimProgress(countLeft.toLong(), countRight.toLong())
                         }
                     },

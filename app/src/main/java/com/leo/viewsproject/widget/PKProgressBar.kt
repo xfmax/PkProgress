@@ -73,6 +73,8 @@ class PKProgressBar : View {
     private var textIsBold = true
     private var leftTextStr = "蓝方"
     private var rightTextStr = "红方"
+    var leftTeamName = ""
+    var leftTeamCount = ""
     var leftFollowTextStr = ""
     var rightFollowTextStr = ""
     private var lightBitmap: Bitmap? = null
@@ -211,6 +213,7 @@ class PKProgressBar : View {
 
         // 光标水平位置
         viewWidth = ((progressWidth - 3 * barPadding) * progressPercentage + barPadding).toFloat()
+
         viewHeight = height
         // 圆角大小，为实际进度条高度一半
         if (isRound) {
@@ -227,8 +230,8 @@ class PKProgressBar : View {
         drawPicture(canvas)
         // 绘制横向半透明光柱
         drawLight(canvas)
-        // 绘制比例文字
-        drawRateText(canvas)
+        // 绘制左边与右边文字
+        drawTeamInfoText(canvas)
         // 绘制跟随进度条移动的文字
         drawFollowText(canvas)
     }
@@ -242,8 +245,8 @@ class PKProgressBar : View {
             viewHeight / 2f + leftHeight / 3,
             paintNumber
         )
-        val rightTextWidth = paintNumber?.measureText(rightFollowTextStr).orZero()
-        val rightTextHeight: Float = paintNumber?.descent().orZero() - paintNumber?.ascent().orZero()
+        val rightTextHeight: Float =
+            paintNumber?.descent().orZero() - paintNumber?.ascent().orZero()
         canvas.drawText(
             rightFollowTextStr,
             boundaryPosition + 16.dp,
@@ -335,12 +338,12 @@ class PKProgressBar : View {
         canvas.restore()
     }
 
-    private fun drawRateText(canvas: Canvas) {
+    private fun drawTeamInfoText(canvas: Canvas) {
         paintLeftText!!.getTextBounds(leftTextStr, 0, leftTextStr.length, rectLeftText)
         paintRightText!!.getTextBounds(rightTextStr, 0, rightTextStr.length, rectRightText)
         val des1W = rectRightText.width()
         val desH = rectLeftText.height()
-
+        //左侧
         // 绘制文字的背景
         canvas.drawRoundRect(
             13f.dp,
@@ -357,6 +360,23 @@ class PKProgressBar : View {
             viewHeight / 2f + desH / 3.0f,
             paintLeftText
         )
+        val teamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
+        // 队名
+        canvas.drawText(
+            leftTeamName,
+            63f.dp,
+            viewHeight / 2f + desH / 3.0f,
+            paintLeftText
+        )
+        val teamCountWidth = paintLeftText?.measureText(leftTeamCount).orZero()
+        // 队伍人数
+        canvas.drawText(
+            leftTeamCount,
+            63f.dp + teamNameWidth + 6f.dp,
+            viewHeight / 2f + desH / 3.0f,
+            paintLeftText
+        )
+        // 右侧
         canvas.drawText(
             rightTextStr,
             progressWidth - viewHeight / 2f - des1W - barPadding,
@@ -379,14 +399,13 @@ class PKProgressBar : View {
             var boundaryPos = viewWidth
             if (progressPercentage == 0.0 || viewWidth == barStartWidth.toFloat()) {
                 // 光标位于最左边
-                boundaryPos = barPadding.toFloat()
+                boundaryPos = barPadding.toFloat() + 57.dp
             } else if (progressPercentage == 1.0 || viewWidth == barEndWidth.toFloat()) {
                 // 光标位于最右边
                 boundaryPos = barEndWidth.toFloat()
             } else if ((viewWidth - barStartWidth < barRadioSize || viewWidth - barStartWidth == barRadioSize)
                 && viewWidth > barStartWidth
             ) {
-                // 光标位于进度条左侧弧形区域
                 boundaryPos = Math.max(viewWidth, barRadioSize + barStartWidth)
             } else if ((viewWidth > barEndWidth - barRadioSize || viewWidth == barEndWidth - barRadioSize)
                 && viewWidth < barEndWidth
@@ -441,8 +460,8 @@ class PKProgressBar : View {
     /************************public method */
     @Synchronized
     fun setAnimProgress(leftValue: Long, rightValue: Long) {
-        leftTextStr = "我方得分$leftValue"
-        rightTextStr = rightValue.toString() + "对方得分"
+        leftFollowTextStr = "${leftValue}m"
+        rightFollowTextStr = "${rightValue}m"
         if (leftValue + rightValue == 0L) {
             setAnimProgress(50f)
         } else {
