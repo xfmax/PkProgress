@@ -4,4 +4,10 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="transparent">#00000000</color>
+    <color name="kl_puncheur_me_team_blue_bg">#4535EB</color>
+    <color name="kl_puncheur_me_team_red_bg">#D82D4C</color>
+    <color name="kl_puncheur_team_blue_start">#5669FF</color>
+    <color name="kl_puncheur_team_blue_end">#5F7AFF</color>
+    <color name="kl_puncheur_team_red_start">#FF5E56</color>
+    <color name="kl_puncheur_team_red_end">#FF406A</color>
 </resources>

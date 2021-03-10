@@ -12,25 +12,33 @@ import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import com.leo.viewsproject.R
 import kotlin.math.max
+import kotlin.math.min
+
 
 /**
  * Describe : 对战积分对比
  * Created by Leo on 2019/2/20 on 9:10.
  */
 class PKProgressBar : View {
+    var textBgColor: Int = 0
+
     /**
      * 绘制跟随进度条移动的数字
      */
     private lateinit var paintNumber: Paint
+    private var bitmapPaint = Paint()
     private var paintBar: Paint? = null
     private var paintOtherBar: Paint? = null
     private var paintLight: Paint? = null
-    private var leftTextPaintBg: Paint? = null
+    private lateinit var leftTextPaintBg: Paint
     private val rightTextPaintBg: Paint? = null
     private var backGroundColor = Color.GRAY
     private var barColor = Color.RED
     private var leftDrawable: Drawable? = null
     private var rightDrawable: Drawable? = null
+    private var rightDrawableOne: Drawable? = null
+    private var rightDrawableTwo: Drawable? = null
+    private var rightDrawableThree: Drawable? = null
     private var onProgressChangeListener: OnProgressChangeListener? = null
     private var halfDrawableWidth = 0
     private var halfDrawableHeight = 0
@@ -61,10 +69,10 @@ class PKProgressBar : View {
     //颜色渐变器
     private var linearGradient: LinearGradient? = null
     private var linearGradientOther: LinearGradient? = null
-    private var gradientStartColor = Color.RED
-    private var gradientEndColor = Color.YELLOW
-    private var otherGradientStartColor = Color.RED
-    private var otherGradientEndColor = Color.YELLOW
+    var gradientStartColor = Color.RED
+    var gradientEndColor = Color.YELLOW
+    var otherGradientStartColor = Color.RED
+    var otherGradientEndColor = Color.YELLOW
     private var barStartWidth = 0
     private var barEndWidth // 进度条最大绘制位置与最小绘制位置
             = 0
@@ -77,6 +85,8 @@ class PKProgressBar : View {
     private var rightTextStr = "红方"
     var leftTeamName = ""
     var leftTeamCount = ""
+    var rightTeamName = ""
+    var rightTeamCount = ""
     var leftFollowTextStr = ""
     var rightFollowTextStr = ""
     private var lightBitmap: Bitmap? = null
@@ -85,7 +95,7 @@ class PKProgressBar : View {
     private var leftTextStrWidth = 0f
     private var leftTextStrHeight = 0f
     private var leftTextStrMargin = 21f.dp
-    private var leftTeamNameMargin = 6f.dp
+    private var commonMargin = 6f.dp
     private var leftTextStrBg = 57f.dp
 
     private var rightTextStrWidth = 0f
@@ -96,15 +106,56 @@ class PKProgressBar : View {
     private var leftFollowHeight = 0f
     private var rightFollowWidth = 0f
     private var rightFollowHeight = 0f
-
+    private var followMargin = 16f.dp
+    /**
+     * 左侧队名显示状态
+     */
     private var leftTeamNameVisible = true
+
+    /**
+     * 左侧团队人数的显示状态
+     */
     private var leftTeamCountVisible = true
 
+    /**
+     * 右侧队名显示状态
+     */
     private var rightTeamNameVisible = true
+
+    /**
+     * 右侧团队人数的显示状态
+     */
     private var rightTeamCountVisible = true
 
+    /**
+     * 左侧的队名
+     */
     private var leftTeamNameWidth = 0f
+
+    /**
+     * 左侧的团队人数
+     */
     private var leftTeamCountWidth = 0f
+
+    /**
+     * 右侧的队名的宽度
+     */
+    private var rightTeamNameWidth = 0f
+
+    /**
+     * 右侧的团队人数宽度
+     */
+    private var rightTeamCountWidth = 0f
+
+    /**
+     * 右侧用户头像边距
+     */
+    private val rightAvatarMargin = 10f.dp
+
+    /**
+     * 右侧用户头像宽度
+     */
+    private val rightAvatarwidth = 58f.dp
 
     constructor(context: Context?) : super(context) {
         init()
@@ -189,10 +240,11 @@ class PKProgressBar : View {
         }
 
         // 左半部文字的背景
-        leftTextPaintBg = Paint()
-        leftTextPaintBg!!.style = Paint.Style.FILL
-        leftTextPaintBg!!.color = Color.parseColor("#4535EB")
-        leftTextPaintBg!!.isAntiAlias = true
+        leftTextPaintBg = Paint().apply {
+            style = Paint.Style.FILL
+            color = textBgColor
+            isAntiAlias = true
+        }
 
         // 右半部分文字
         paintRightText = Paint()
@@ -244,7 +296,7 @@ class PKProgressBar : View {
         // 光标水平位置
         viewWidth = ((progressWidth - 3 * barPadding) * progressPercentage + barPadding).toFloat()
         viewWidth = max(viewWidth, leftTextStrBg + leftTextStrMargin + leftFollowWidth)
-        Log.d("xbase", "onDraw: $viewWidth")
+        viewWidth = min(viewWidth, progressWidth - commonMargin - barPadding - rightAvatarMargin - rightAvatarwidth - rightFollowWidth - followMargin)
         viewHeight = height
         // 圆角大小，为实际进度条高度一半
         if (isRound) {
@@ -268,24 +320,28 @@ class PKProgressBar : View {
     }
 
     private fun drawFollowText(canvas: Canvas) {
-        val leftFollowStart = boundaryPosition - leftFollowWidth - halfDrawableWidth - 16.dp
+        val leftFollowStart = boundaryPosition - leftFollowWidth - halfDrawableWidth - followMargin
+        val rightFollowStart = boundaryPosition + rightFollowWidth + halfDrawableWidth + followMargin
         canvas.drawText(
             leftFollowTextStr,
-            boundaryPosition - leftFollowWidth - halfDrawableWidth - 16.dp,
+            boundaryPosition - leftFollowWidth - halfDrawableWidth - followMargin,
             viewHeight / 2f + leftFollowHeight / 3,
             paintNumber
         )
         leftTeamCountVisible =
             leftFollowStart > leftTextStrBg + leftTeamNameWidth + leftTextStrMargin * 2 + leftTeamCountWidth
         leftTeamNameVisible =
-            leftFollowStart > leftTextStrBg + leftTeamNameMargin + leftTeamNameWidth
+            leftFollowStart > leftTextStrBg + commonMargin + leftTeamNameWidth
+        rightTeamCountVisible =
+            rightFollowStart < (progressWidth - commonMargin * 2 - barPadding - rightAvatarMargin - rightAvatarwidth - rightTeamNameWidth - rightTeamCountWidth)
+        rightTeamNameVisible =
+            rightFollowStart < (progressWidth - commonMargin - rightTeamNameWidth - barPadding - rightAvatarMargin - rightAvatarwidth)
         canvas.drawText(
             rightFollowTextStr,
-            boundaryPosition + 16.dp,
+            boundaryPosition + followMargin,
             viewHeight / 2f + rightFollowHeight / 3,
             paintNumber
         )
-
     }
 
     private fun drawLight(canvas: Canvas) {
@@ -324,12 +380,12 @@ class PKProgressBar : View {
         val radios = floatArrayOf(
             barRadioSize, barRadioSize, 0f, 0f, 0f, 0f, barRadioSize, barRadioSize
         )
-        if (progressPercentage == 1.0) {
-            radios[2] = barRadioSize
-            radios[3] = barRadioSize
-            radios[4] = barRadioSize
-            radios[5] = barRadioSize
-        }
+//        if (progressPercentage == 1.0) {
+//            radios[2] = barRadioSize
+//            radios[3] = barRadioSize
+//            radios[4] = barRadioSize
+//            radios[5] = barRadioSize
+//        }
         canvas.save()
         rectFPB[barPadding.toFloat(), barPadding.toFloat(), right - halfDrawableWidth] =
             (viewHeight - barPadding).toFloat()
@@ -375,6 +431,7 @@ class PKProgressBar : View {
     private fun drawTeamInfoText(canvas: Canvas) {
         //左侧
         // 绘制文字的背景
+        leftTextPaintBg.color = textBgColor
         canvas.drawRoundRect(
             13f.dp,
             13f.dp,
@@ -394,27 +451,39 @@ class PKProgressBar : View {
             // 队名
             canvas.drawText(
                 leftTeamName,
-                leftTextStrBg + leftTeamNameMargin,
+                leftTextStrBg + commonMargin,
                 viewHeight / 2f + leftTextStrHeight / 3.0f,
                 paintLeftText
             )
         }
-        if (leftTeamCountVisible){
+        if (leftTeamCountVisible) {
             // 队伍人数
             canvas.drawText(
                 leftTeamCount,
-                leftTextStrBg + leftTeamNameWidth + leftTeamNameMargin * 2,
+                leftTextStrBg + leftTeamNameWidth + commonMargin * 2,
                 viewHeight / 2f + leftTextStrHeight / 3.0f,
                 paintLeftText
             )
         }
         // 右侧
-        canvas.drawText(
-            rightTextStr,
-            progressWidth - viewHeight / 2f - rightTextStrWidth - barPadding,
-            viewHeight / 2f + leftTextStrHeight / 3.0f,
-            paintRightText
-        )
+        if (rightTeamNameVisible) {
+            // 右侧队名
+            canvas.drawText(
+                rightTeamName,
+                progressWidth - commonMargin - rightTeamNameWidth - barPadding - rightAvatarMargin - rightAvatarwidth,
+                viewHeight / 2f + leftTextStrHeight / 3.0f,
+                paintRightText
+            )
+        }
+        if (rightTeamCountVisible) {
+            // 右侧团队人数
+            canvas.drawText(
+                rightTeamCount,
+                progressWidth - commonMargin * 2 - barPadding - rightAvatarMargin - rightAvatarwidth - rightTeamNameWidth - rightTeamCountWidth,
+                viewHeight / 2f + leftTextStrHeight / 3.0f,
+                paintRightText
+            )
+        }
     }
 
     /**
@@ -435,7 +504,7 @@ class PKProgressBar : View {
                     barPadding.toFloat() + leftTextStrBg + leftTextStrMargin + leftFollowWidth
             } else if (progressPercentage == 1.0 || viewWidth == barEndWidth.toFloat()) {
                 // 光标位于最右边
-                boundaryPos = barEndWidth.toFloat()
+                boundaryPos = barEndWidth.toFloat() - rightAvatarwidth - rightAvatarMargin
             } else if ((viewWidth - barStartWidth < barRadioSize || viewWidth - barStartWidth == barRadioSize)
                 && viewWidth > barStartWidth
             ) {
@@ -496,7 +565,8 @@ class PKProgressBar : View {
         rightFollowWidth = paintNumber.measureText(rightFollowTextStr).orZero()
         rightFollowHeight = paintNumber.descent().orZero() - paintNumber.ascent().orZero()
 
-        leftTeamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
+        rightTeamNameWidth = paintLeftText?.measureText(rightTeamName).orZero()
+        rightTeamCountWidth = paintLeftText?.measureText(rightTeamCount).orZero()
 
         leftTeamNameWidth = paintLeftText?.measureText(leftTeamName).orZero()
         leftTeamCountWidth = paintLeftText?.measureText(leftTeamCount).orZero()

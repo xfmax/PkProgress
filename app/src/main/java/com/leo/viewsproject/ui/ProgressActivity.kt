@@ -19,9 +19,23 @@ class ProgressActivity : AppCompatActivity() {
         setContentView(R.layout.activity_progress)
         btnstart = findViewById(R.id.btn_start)
         pkProgressBar = findViewById(R.id.progress)
-        pkProgressBar?.setAnimProgress(100,100)
+        pkProgressBar?.setAnimProgress(50,50)
         pkProgressBar?.leftTeamName = "卡卡特罗队"
         pkProgressBar?.leftTeamCount = "38人"
+        pkProgressBar?.rightTeamName = "贝吉塔队"
+        pkProgressBar?.rightTeamCount = "66人"
+        // 蓝-红
+//        pkProgressBar?.gradientStartColor = resources.getColor(R.color.kl_puncheur_team_blue_start)
+//        pkProgressBar?.gradientEndColor = resources.getColor(R.color.kl_puncheur_team_blue_end)
+//        pkProgressBar?.otherGradientStartColor = resources.getColor(R.color.kl_puncheur_team_red_start)
+//        pkProgressBar?.otherGradientEndColor = resources.getColor(R.color.kl_puncheur_team_red_end)
+//        pkProgressBar?.textBgColor = resources.getColor(R.color.kl_puncheur_me_team_blue_bg)
+        // 红-蓝
+        pkProgressBar?.gradientStartColor = resources.getColor(R.color.kl_puncheur_team_red_start)
+        pkProgressBar?.gradientEndColor = resources.getColor(R.color.kl_puncheur_team_red_end)
+        pkProgressBar?.otherGradientStartColor = resources.getColor(R.color.kl_puncheur_team_blue_start)
+        pkProgressBar?.otherGradientEndColor = resources.getColor(R.color.kl_puncheur_team_blue_end)
+        pkProgressBar?.textBgColor = resources.getColor(R.color.kl_puncheur_me_team_red_bg)
         with(btnstart) {
             this?.setOnClickListener(View.OnClickListener {
                 val executor = Executors.newScheduledThreadPool(1)
